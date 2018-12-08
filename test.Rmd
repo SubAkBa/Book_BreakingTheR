@@ -1,0 +1,26 @@
+---
+title: "Test"
+output: html_document
+---
+
+데이터를 불러오고 구조를 살피고 평균, 분산을 구해보고 그래프를 그려라.
+
+```{r}
+DF <- read.csv("example_studentlist.csv")
+str(DF)
+Mean <- mean(DF$height)
+Sd <- sd(DF$weight)
+plot(weight ~ height, data = DF)
+
+```
+
+혈액형과 성별, 휴학여부의 빈도수를 구하라.
+
+```{r}
+a <- table(DF$bloodtype)
+b <- table(DF$sex)
+c <- table(DF$absence)
+a; b; c
+
+```
+
