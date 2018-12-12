@@ -130,4 +130,103 @@ plot(x1, y1, type = "c") # 산점도 영역을 제외시킨 그래프
 plot(x1, y1, type = "b") # c와 p를 함께 나타낸 그래프
 plot(x1, y1, type = "o") # l과 p를 함께 나타낸 그래프
 plot(x1, y1, type = "h") # 막대 그래프
-plot(x1, y1, type = "s") # 막대 그래프 영ㅇ
+plot(x1, y1, type = "s") # 막대 그래프 영역
+
+
+
+# package::ggplot2, ggthemes ---
+library(ggplot2)
+library(ggthemes)
+ggplot(data = diamonds, aes(x = carat, y = price, colour = clarity)) +
+  geom_point() + theme_wsj()
+g1 <- ggplot(data = diamonds, aes(x = carat, y = price, colour = clarity))
+g2 <- geom_point()
+g3 <- theme_wsj()
+g1 + g2 + g3
+g1 + g2 + theme_bw()
+
+## ggplot() ----
+## 미적 요소 매핑(aesthetic mapping)
+## -> 주로 사용할 데이터를 x축, y축, colour등 그래프 요소에 매핑하는 일
+## geom() ----
+## 어떤 그래프를 그릴지 선택 : geom_point(), geom_line(), ... - 기하객체(geometric object)
+DF <- read.csv("example_studentlist.csv")
+g1 <- ggplot(DF, aes(x = height, y = weight, colour = bloodtype))
+g1 + geom_point()
+g1 + geom_line()
+g1 + geom_line() + geom_point()
+g1 + geom_line(size = 1) + geom_point(size = 10)
+g1 + geom_line(aes(colour = sex), size = 1) + geom_point(size = 10)
+
+## facet_grid() ----
+## -> 명목형 변수를 기준으로 나눠서 별도의 그래프를 그려준다.
+## 목적 : 명목형 변수의 level을 기준으로 나눠서 서로 비교하는 것.
+g1 + geom_point(size = 10) + geom_line(size = 1) + facet_grid(. ~ sex)
+g1 + geom_point(size = 10) + geom_line(size = 1) + facet_grid(sex ~ .) # y축 : 성별
+g1 + geom_point(size = 10) + geom_line(size = 1) + facet_grid(sex ~ ., scales = "free")
+                                                   # 각각의 그래프 범위가 같지 않아야 한다.
+g1 + geom_point(size = 10) + geom_line(size = 1) + facet_grid(. ~ sex, scales = "free")
+                                                   # facet_grid는 y축에 대해서는 스케일 허용X
+g1 + geom_point(size = 10) + geom_line(size = 1) + facet_wrap(~ sex, scales = "free")
+
+## facet_grid() / facet_wrap() ----
+g <- ggplot(mpg, aes(displ, hwy))
+g + geom_point()
+g + geom_point() + facet_grid(. ~ class)
+g + geom_point(alpha = .3) + facet_grid(cyl ~ class, scales = "free")
+                             # 명목형 변수들의 level별로 나눠서 그래프를 보여주는 목적으로 사용
+g + geom_point(alpha = .3) + facet_wrap(cyl ~ class, scales = "free")
+                             # 각각의 그래프를 별도로 모아서 보기 위함.
+g + geom_point(alpha = .3) + facet_wrap(cyl ~ class, scales = "free", ncol = 3)
+
+## geom_bar() ----
+ggplot(DF, aes(x = bloodtype)) + geom_bar()
+ggplot(DF, aes(x = bloodtype, fill = sex)) + geom_bar()
+ggplot(DF, aes(x = bloodtype, fill = sex)) + geom_bar(position = "dodge")
+                                             # 하나의 막대에 누적되지 않게 각각의 막대로 표시.
+ggplot(DF, aes(x = bloodtype, fill = sex)) + geom_bar(position = "identity")
+                                             # 더해지지 않고 겹쳐서 표시.
+ggplot(DF, aes(x = bloodtype, fill = sex)) + geom_bar(position = "fill")
+                                             # 누적 그래프
+ggplot(DF, aes(x = bloodtype, fill = sex)) + geom_bar(position = "dodge", width = 0.3)
+                                             # 막대의 넓이값 변경.
+(mheightByblo <- tapply(DF$height, DF$bloodtype, mean))
+DF2 <- as.data.frame(mheightByblo)
+DF2$bloodtype <- rownames(DF2)
+rownames(DF2) <- NULL
+DF2
+ggplot(DF2, aes(x = bloodtype, y = mheightByblo, fill = bloodtype)) +
+  geom_bar(stat = "identity") + scale_fill_brewer() # bin(default) : 빈도수, identity : 그대로 값
+
+## geom_histogram() ----
+g1 <- ggplot(diamonds, aes(x = carat))
+g1 + geom_histogram(binwidth = 0.1, fill = "orange") # y축 : 도수
+g1 + geom_histogram(aes(y = ..count..), binwidth = 0.1, fill = "orange") # '..' : 예약어
+g1 + geom_histogram(aes(y = ..ncount..), binwidth = 0.1, fill = "orange") # 표준화된 도수값
+g1 + geom_histogram(aes(y = ..density..), binwidth = 0.1, fill = "orange") # 밀도값
+g1 + geom_histogram(aes(y = ..ndensity..), binwidth = 0.1, fill = "orange") # 표준화된 밀도값
+
+## 그룹별로 따로 그래프 그리기 ----
+g1 + geom_histogram(binwidth = 0.1, fill = "orange") + facet_grid(color ~ .)
+g1 + geom_histogram(binwidth = 0.1, fill = "orange") + facet_grid(color ~ ., scales = "free")
+
+## levels별로 겹쳐서 보기 ----
+g1 + geom_histogram(aes(fill = color), binwidth = 0.1, alpha = 0.5)
+
+## geom_point() ----
+DF <- read.csv("example_studentlist.csv")
+g1 <- ggplot(DF, aes(x = weight, y = height))
+g1 + geom_point()
+g1 + geom_point(aes(colour = sex), size = 7)
+g1 + geom_point(aes(colour = sex, shape = sex), size = 7)
+g1 + geom_point(aes(colour = sex, shape = bloodtype), size = 7)
+g1 + geom_point(aes(colour = height, shape = sex), size = 7)
+g1 + geom_point(aes(size = height, shape = sex), colour = "orange")
+g1 + geom_point(aes(colour = sex, shape = bloodtype), size = 7, alpha = 0.6)
+g1 + geom_point(aes(colour = sex), size = 7) + geom_smooth(method = "lm")
+g1 + geom_point(aes(colour = sex), size = 7) + geom_text(aes(label = name))
+g1 + geom_point(aes(colour = sex), size = 7) + geom_text(aes(label = name),
+                                                         vjust = -1.1, colour = "grey35")
+
+## theme() ----
+g1 + geom_histogram(aes(y = ..ndensity..), binwidth = 0.1, fill = "orange") + theme_wsj()
