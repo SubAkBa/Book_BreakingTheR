@@ -141,3 +141,142 @@ DF4 <- filter(DF, Provinces == "서울특별시")
 (Graph2 <- ggplot(DF4, aes(x = City, y = (SexRatio - 1), fill = SexF)) + 
     geom_bar(stat = "identity", position = "identity") + theme_wsj()) 
                                 # 서울은 여자비율이 더 높다.
+
+
+# Example05 - reshape2패키지의 melt()를 이용해 데이터를 가공 후 그래프로 나타내기 ----
+# package : dplyr, ggplot2, ggthemes, reshape2
+# Step1. 필요한 패키지를 불러온다.
+library(dplyr)
+library(ggplot2)
+library(ggthemes)
+library(reshape2)
+
+# Step2. 데이터 불러오기.
+DF <- read.csv("example_population_f.csv")
+DF <- DF[, -1]
+DF <- tbl_df(DF)
+
+# Step3. '도'별 합을 구한다.
+group <- group_by(DF, Provinces)
+DF2 <- summarise(group, SumPopulation = sum(Population), Male = sum(Male), Female = sum(Female))
+         # group_by(data.frame객체, 그룹지을 변수), summarise(그룹객체, function) ----
+         # -> 그룹을 지어 유지하라,                 새로운 객체에 새로운 변수로 요약하라.
+
+# Step4. 남녀 변수를 factor로 바꾼다.
+DF3 <- melt(DF2, id.vars = c("Provinces", "SumPopulation"), 
+            measure.vars = c("Male", "Female"))
+       # melt(data.frame, id.vars = 바꾸지 않을 변수들, measure.vars = 바꿀 변수들) ----
+       # -> 여러 변수를 하나의 명목형 변수로 바꿔라.
+DF2; DF3
+colnames(DF3)[3] <- "Sex"
+colnames(DF3)[4] <- "Population"
+DF3
+
+# Step5. 남녀 비율을 추가한다.
+DF4 <- mutate(DF3, Ratio = Population / SumPopulation)
+DF4$Ratio <- round(DF4$Ratio, 3)
+
+# Step6. 그래프 그리기.
+G1 <- ggplot(DF4, aes(x = Provinces, y = Ratio, fill = Sex)) + geom_bar(stat = "identity") +
+  coord_cartesian(ylim = c(0.45, 0.55)) + theme_wsj()
+G2 <- geom_text(aes(y = Ratio, label = Ratio), colour = "white")
+G1 + G2
+                  # coord_cartesian() - X축 or Y축에서 보여주고 싶은 영역을 확대해서 보여준다.
+
+# Step7. 텍스트 표시를 그래프 가운데 넣기 위해 데이터에 위치값을 추가한다.
+(DF4 <- mutate(DF4, Position = ifelse(Sex == "Male", 0.475, 0.525)))
+
+# Step8. 그래프를 다시 셋팅한다.
+G1 <- ggplot(DF4, aes(x = Provinces, y = Ratio, fill = Sex)) + geom_bar(stat = "identity") +
+  coord_cartesian(ylim = c(0.45, 0.55)) + theme_wsj()
+G2 <- geom_text(aes(y = Position, label = Ratio), colour = "white")
+G1 + G2
+
+
+# Example06 - 클리블랜드 점 그래프 그리기 ----
+# package : dplyr, ggplot2, ggthemes
+# Step1. 필요한 패키지를 불러온다.
+library(dplyr)
+library(ggplot2)
+library(ggthemes)
+
+# Step2. 데이터 불러오기.
+DF <- read.csv("example_population_f.csv")
+DF <- DF[, -1]
+DF <- tbl_df(DF)
+
+# Step3. 남녀 비율을 명목형 변수로 바꾼다.
+DF2 <- mutate(DF, SexF = ifelse(SexRatio > 1, "남자비율높음", 
+                                ifelse(SexRatio == 1, "남녀비율같음", "여자비율높음")))
+
+# Step4. 경기도 데이터만 DF3에 따로 저장하기.
+DF3 <- filter(DF2, Provinces == "경기도")
+
+# Step5. 그래프 그리기.
+(Graph <- ggplot(DF3, aes(x = (SexRatio - 1), y = reorder(City, SexRatio))) + 
+    geom_segment(aes(yend = City), xend = 0, colour = "grey50") +
+    geom_point(size = 4, aes(colour = SexF)) + theme_minimal())
+                 # geom_segment() - xend : X축의 시작 위치
+                 #                  yend : Y축의 factor 변수
+                 #                  colour : xend에서 값을 나타내는 위치까지의 line color
+                 #                  Y축을 reorder()함수로 정렬해야 순위별로 볼 수 있다.
+
+
+# Example07 - 시간에 따른 연령별 인구 변화 그래프 그리기 ----
+# package : dplyr, ggplot2, ggthemes, reshape2, scales
+# Step1. 필요한 패키지를 불러온다.
+library(dplyr)
+library(ggplot2)
+library(ggthemes)
+library(reshape2)
+library(scales)
+
+# Step2. 시간별 인구변화 자료를 불러온다.
+DF <- read.csv("example_population2.csv")
+DF <- tbl_df(DF)
+
+# Step3. 남여를 합해 새로운 data.frame에 저장한다.
+group <- group_by(DF, Time)
+DF2 <- summarise(group, s0 = sum(age0to4, age5to9),
+                 s10 = sum(age10to14, age15to19),
+                 s20 = sum(age20to24, age25to29),
+                 s30 = sum(age30to34, age35to39),
+                 s40 = sum(age40to44, age45to49),
+                 s50 = sum(age50to54, age55to59),
+                 s60 = sum(age60to64, age65to69),
+                 s70 = sum(age70to74, age75to79),
+                 s80 = sum(age80to84, age85to89),
+                 s90 = sum(age90to94, age95to99),
+                 s100 = sum(age100to104, age105to109))
+                 # 코드가 너무 길다.
+                 # Making Fucntion using variable name ----
+library(foreach)
+DF2_make <- foreach(i = c("", 1 : 10), .combine = cbind) %do% {
+  cols <- paste0("s", i, "0")
+  prevage <- paste0("age", i, "0to", i, "4")
+  nextage <- paste0("age", i, "5to", i, "9")
+  columnss <- group %>% summarise(sum(!!sym(prevage), !!sym(nextage)))
+  colnames(columnss)[2] <- cols
+  if(i != c(""))
+    columnss$Time <- NULL
+  
+  return(columnss)
+}
+DF2_make <- tbl_df(DF2_make)
+head(DF2, 5)
+head(DF2_make, 5)
+
+# Step4. 각 연령대별 변수를 명목형 변수로 만든다.
+DF3 <- melt(DF2, id.vars = "Time", measure.vars = c(2 : dim(DF2)[2]))
+colnames(DF3) <- c("Time", "Generation", "Population")
+
+# Step5. 그래프로 그린다.
+(G1 <- ggplot(DF3, aes(x = Time, y = Population, colour = Generation, fill = Generation)) +
+    geom_area(alpha = .6) + theme_wsj())
+            # geom_area() ----
+            # -> 영역 그래프를 그려라.
+
+# Step6. Y축 값을 comma가 들어가게 변경한다.
+G2 <- ggplot(DF3, aes(x = Time, y = Population, colour = Generation, fill = Generation)) +
+  geom_area(alpha = .6) + theme_wsj()
+G2 + scale_y_continuous(labels = comma)
