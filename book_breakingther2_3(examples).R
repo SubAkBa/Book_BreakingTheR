@@ -280,3 +280,134 @@ colnames(DF3) <- c("Time", "Generation", "Population")
 G2 <- ggplot(DF3, aes(x = Time, y = Population, colour = Generation, fill = Generation)) +
   geom_area(alpha = .6) + theme_wsj()
 G2 + scale_y_continuous(labels = comma)
+
+
+# Example08 - Sankey Diagram으로 예산 한눈에 보기 ----
+# package : dplyr, rCharts
+# Download : https://github.com/timelyportfolio/rCharts_d3_sankey
+# Step1. 필요한 패키지를 불러온다.
+library(dplyr)
+library(rCharts)
+
+# Step2. 데이터를 불러온다.
+DF <- read.csv("example_2015_expenditure.csv")
+str(DF)
+
+# Step3. 데이터를 복사해서 사용한다.
+DF2 <- DF
+
+# Step4. 확정안 변수의 이름과 단위를 변경한다.
+colnames(DF2)[6] <- "value"
+DF2["value"] <- round(DF2["value"] / 1000)
+
+# Step5. 데이터 처리하기 전 데이터를 복사한다.
+DF3 <- DF2
+
+# Step6. 데이터를 전처리한다.
+sum1 <- DF3 %>% group_by(소관명, 회계명) %>%  summarise(sum(value))
+sum2 <- DF3 %>% group_by(회계명, 분야명) %>%  summarise(sum(value))
+sum3 <- DF3 %>% group_by(분야명, 부문명) %>%  summarise(sum(value))
+sum4 <- DF3 %>% group_by(부문명, 프로그램명) %>%  summarise(sum(value))
+sum1
+
+# Step7. 변수 이름을 영문으로 바꾼다.
+colnames(sum1) <- c("source", "target", "value")
+colnames(sum2) <- c("source", "target", "value")
+colnames(sum3) <- c("source", "target", "value")
+colnames(sum4) <- c("source", "target", "value")
+
+# Step8. 만든 모든 객체를 하나로 합친다.
+sum1 <- as.data.frame(sum1)
+sum2 <- as.data.frame(sum2)
+sum3 <- as.data.frame(sum3)
+sum4 <- as.data.frame(sum4)
+DF4 <- rbind(sum1, sum2, sum3, sum4) ## class(sum1) <- class(sum1)[-1]방법으로 group_by 속성 삭제
+
+# Step9. 그래프를 그리기 위해 먼저 rCharts객체를 만든다.
+sankeyPlot <- rCharts$new()
+
+# Step10. 사용할 library를 지정한다.
+sankeyPlot$setLib("libraries/sankey")
+sankeyPlot$setTemplate(script = "libraries/sankey/layouts/chart.html")
+
+# Step11. 그래프 관련 정보를 지정한다.
+sankeyPlot$set(data = DF4, nodeWidth = 15, nodePadding = 13, layout = 300, width = 900,
+               height = 600, units = "천원", title = "Sankey Diagram")
+               # nodeWidth : 노드의 가로폭, nodePadding : 노드를 연결하는 line들간의 간격
+               # layout, width, height : 그려질 그래프의 크기
+               # units : 노드를 연결하는 선 위에 마우스가 오버되었을 때 
+               #         tooltip으로 나타나는 데이터의 값의 단위
+
+# Step12. 그래프를 실행한다.
+sankeyPlot
+
+
+# Example09 - 작년에 구입한 아파트 값은 올랐을까? ----
+# package : readxl, dplyr, stringr, rCharts
+# Graph : http://www.nytimes.com/interactive/2014/01/23/business/case-shiller-slider.html?_r=0
+# Step1. 필요한 library를 불러온다.
+library(tidyverse)
+library(readxl)
+library(dplyr)
+library(stringr)
+library(rCharts)
+
+# Step2. 데이터를 불러올 준비를 한다.
+files <- sprintf("%4d년_%02d월_전국_실거래가_아파트(매매).xls", rep(2006 : 2014, each = 12), 1 : 12)
+         # %4d : 네 자리 숫자를 넣는 것. %02d 두 자리 숫자를 넣는다. (0이 들어감으로서 01, 02, ...)
+
+# Step3. 다운받은 모든 데이터를 DF객체로 불러온다.
+DF <- NULL
+for(i in 1 : length(files)){
+  t <- read_excel(path = paste0("rawdata", "/", files[i]), sheet = 1, col_names = T)
+  t <- mutate(t, date = paste0(substr(files[i], 1, 4), "-", 
+                               month = substr(files[i], 7, 8), "-10"))
+  DF <- rbind(DF, t)
+}
+
+# Step4. 깨진 한글변수명을 바꿔준다.
+DF2 <- DF # 안전을 위해 새로운 객체에 복사한다.
+colnames(DF2) <- c("시군구", "본번", "부번", "단지명", "전용면적", "계약일", "거래금액", 
+                   "층", "건축년도", "도로명주소", "date")
+
+# Step5. 필요한 데이터만 불러온다.
+DF3 <- data.frame(date = DF2$date, addr = DF2$시군구, val = DF2$거래금액)
+
+# Step6. 데이터형을 바꾼다.
+str(DF3)
+
+# Step7. addr변수를 정리한다.
+City <- str_split_fixed(DF3[, 2], " ", 4)
+City <- data.frame(City)
+str(City)
+
+# Step8. City변수에서 '구'만 뽑아 넣는다.
+DF4 <- data.frame(date = DF3[, 1], addr = City[, 3], val = DF3[, 3])
+str(DF4)
+
+# Step9. 데이터를 정리한다.
+DF5 <- DF4 %>% group_by(date, addr) %>% summarise(mean(val))
+
+# Step10. 최종 데이터를 정리한다.
+colnames(DF5)[3] <- "val"
+DF5[["date"]] <- as.character(DF5[["date"]])
+DF5$val <- DF5$val / 50 # 사용할 Graph library가 y축을 자동으로 바꿔주는 기능이 없다.
+str(DF5)
+
+# Step11. 데이터 그래프 그리기 단계
+DF5 <- read.csv("example_realty.csv")
+str(DF5)
+
+# Step12. 그래프를 그리기 위해 변수를 객체화 한다.
+g2 <- rCharts$new() # rCharts는 객체지향적
+
+# Step13. 필요한 library를 불러온다.
+g2$setLib("libraries/nyt_home")
+g2$setTemplate(script = "libraries/nyt_home/layouts/nyt_home.html")
+
+# Step14. 필요한 setting을 한다.
+g2$set(description = "This data comes from the 'rt.molit.go.kr' datset",
+       data = DF5, groups = "addr")
+
+# Step15. Graph를 그린다.
+g2
