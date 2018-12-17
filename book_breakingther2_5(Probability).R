@@ -19,8 +19,8 @@
 # 모두 더한 값 = 1 -> P(x1) + P(x2) + P(x3) + ... + P(n-1) + P(n) = 1
 ## 확률질량함수(Probability mass function, PMF) : 이산확률변수 X에 대응하는 확률을 함수(f)로 나타낼 때,
 ##                                                f(X)를 X의 확률질량함수(PMF)라고 한다.
-## 기대값 E(X) = Xbar = for(i=1, i<=n, i++) ∑ xi * pi
-## 분산 V(X) = ∂^2(X) = E{(x - Xbar)^2} = ∑ (xi - Xbar)^2 * pi
+## 기대값 E(X) = x̄ = for(i=1, i<=n, i++) ∑ xi * pi
+## 분산 V(X) = ∂^2(X) = E{(x - x̄)^2} = ∑ (xi - x̄)^2 * pi
 ## 표준편차 ∂(X) = √V(X)
 
 # - 연속확률변수(continuous random variable) : 어떤 구간 안에 있는 셀 수 없이 많은 값을 갖는 확률 변수 
@@ -46,7 +46,7 @@
 ### 모집단의 관찰대상이 많을 때 전수 조사하여 분포를 확인하는
 ### 비효율적이며 경우에 따라 불가능에 가깝다.
 
-## 중심극한정리(Central Limit Theorem) : 충분히 큰 표본으로 구한 표본평균(Xbar)의 분포는
+## 중심극한정리(Central Limit Theorem) : 충분히 큰 표본으로 구한 표본평균(x̄)의 분포는
 ##                                       정규분포에 근접하게 된다.
 ## 요약 : 표본을 n개씩 가능한 경우의 수만큼 반복하여 추출하면 모집단의 특성치(평균, 표준편차)를
 ##        정확하게 계산 할 수 있다. 
@@ -87,16 +87,16 @@ ylim <- c(0, 0.01)
 plot(x, dnorm(x, mean = 16000, sd = 52.7), main = "Normal", type = "l", ylim = ylim)
 
 ## 정규분포를 따르는 모집단으로부터 어떤 표본 하나를 추출할 때, 
-## 경험적 규칙에 의해 그 표본이 모집단 평균(Mu)로부터
-## ±1∂ 사이에 위치할 확률 P(Mu - 1∂ <= x <= Mu + 1∂) = 0.6827
-## ±2∂ 사이에 위치할 확률 P(Mu - 2∂ <= x <= Mu + 2∂) = 0.9545
-## ±3∂ 사이에 위치할 확률 P(Mu - 3∂ <= x <= Mu + 3∂) = 0.9973
+## 경험적 규칙에 의해 그 표본이 모집단 평균(μ)로부터
+## ±1∂ 사이에 위치할 확률 P(μ - 1∂ <= x <= μ + 1∂) = 0.6827
+## ±2∂ 사이에 위치할 확률 P(μ - 2∂ <= x <= μ + 2∂) = 0.9545
+## ±3∂ 사이에 위치할 확률 P(μ - 3∂ <= x <= μ + 3∂) = 0.9973
 
 
 ## 표준정규분포(Standart Normal Distribution) : 특정 현상의 단위(cm, kg 등)와 상관없이 
-##                                              표준화 값(Z-value, (X - Mu) / ∂)으로 나타낸 분포
+##                                              표준화 값(Z-value, (X - μ) / ∂)으로 나타낸 분포
 ## 표본이 평균에서 멀어져 있는 정도, 
-## 즉 편차(X - Mu)가 표준편차(표준오차)의 몇 배인지를 나타내는 값 = Z.
+## 즉 편차(X - μ)가 표준편차(표준오차)의 몇 배인지를 나타내는 값 = Z.
 ## Z가 1인 곳의 면적 : P(0 < Z < 1) = 0.3413
 pnorm(1, mean = 0, sd = 1) - 0.5
 ## 확률이 95%인 Z를 찾기 위해 양측에 2.5%씩 분배 -> Z = 1.96
@@ -108,3 +108,348 @@ qnorm(0.025, mean = 0, sd = 1, lower.tail = F)
 ##     0.5  0.1915    1.645   0.45
 ##       1  0.3413     1.96 0.4750
 ##       2  0.4772     2.58 0.4950
+
+
+## 통계적 추정 
+## 신뢰구간(Confidence Interval) : 표본평균의 연속확률분포에 모집단 평균 μ가 포함될
+##                                 x̄ ±Z(α)/2 ∂ / √n
+## 신뢰수준(Confidence Level), 신뢰도(1 - α), 신뢰계수 : 신뢰구간 내에 모집단 평균 μ가 포함될 확률
+## 오차율 : 신뢰구간 밖에 모집단평균이 포함될 확률 (α)
+## 추측통계 : 표본평균이 띄는 정규성을 이용하여 모집단의 모수를 추론하는 통계의 유형
+### '통계적 추정(Statistical Estimation)' : 표본 통계량으로 모수를 확정적으로 알 수는 없지만,
+###                                         확률에서 유래한 '신뢰수준(Confidence Level)'개념을
+###                                         이용하여 모수를 추정하는 방법
+### '가설 검정(Test)' : 기존 주장이나 가설을 '신뢰도'수준에서 통계량을 이용하여 테스트하는 방법
+
+
+
+## 다양한 분포(패턴)들
+## 1. t분포 -> 표본의 표준편차를 이용하여 모집단을 추정할 때 '자유도'에 따라 엄밀하게 표준화된
+##             표본평균(x̄)의 확률분포를 채택
+## 2. 포아송분포 -> 일정한 시간, 거리, 공간 범위에 특정 사건의 결과가 나타날 횟수(X)의 확률 분포
+## 3. 지수분포 -> 포아송을 따르는 현상에 이어 다음 결과가 나타나기까지 소요시간(X)의 확률 분포
+## 4. 어떤 현상(사건)의 결과가 '두 가지 결과'로만 나타날 때
+## 4-1. 이항 분포 -> 특정 결과가 '나타날 횟수(X)'의 확률 분포
+## 4-2. 기하 분포 -> 특정 결과가 '처음 나타날 때까지 시도할(또는 실패할) 횟수(X)'의 확률 분포
+## 4-3. 초기하 분포 -> n개씩 연속 추출하여(비복원) 'n개중 특정 결과가 나타날 횟수(X)'의 확률 분포
+
+
+### t-분포(Student t-distribution) - curve(dt()) ----
+### : 모집단의 평균을 아는 경우는 드물고 표준편차는 파악하기 힘들다.
+###   따라서, 불편추정량으로써 표본표준편차 s를 대신 사용하여 Z를 계산할 수도 있다.
+###   Z = (x̄ - μ) / (∂ / √n) = (x̄ - μ) / (S / √n)
+###   t = (x̄ - μ) / (S / √n)
+###   ※ s를 사용하여 모수를 추정 또는 검정하는 가장 적절한 확률분포
+###   평균 = 0, 좌우대칭이며 표본의 수, 자유도 = df(degrees of freedom)에 따라 모양이 달라진다.
+par(mfrow = c(2, 2))
+n_list <- c(2, 5, 10, 30) # 표본 수 n
+df_list <- n_list - 1 # 자유도 df
+for(i in 1 : length(df_list)){
+  curve(dt(x, df_list[i]), -4, 4, xlab = "t", ylab = "f(t)", ylim = c(0, 0.5),
+        main = paste("df = ", df_list[i]))
+}
+
+par(mfrow = c(1, 1))
+x <- c(25, 24, 24, 27, 29, 31, 28, 24, 25, 26, 25, 18, 30, 28, 23, 26, 27, 23,
+       16, 20, 22, 22, 25, 24, 24, 25, 25, 27, 26, 30, 25, 25, 26, 26, 25, 24)
+n <- length(x) # n
+df <- n - 1 # 자유도
+x_mean <- mean(x) # 표본평균
+(x_sd <- sd(x)) # 표준편차
+(x_se <- x_sd / sqrt(n)) # 표준오차
+                         # x̄ = 25, S = 3.043, n = 36, S / √n = 0.507
+x_temp <- c(23, 24, 25, 26, 27)
+(x_temp_t <- round((x_temp - x_mean) / x_se, 3))
+curve(dt(x, df), -4, 4, xlab = "t", ylab = "f(t)", 
+      ylim = c(0, 0.5), main = paste("n = ", n, ", df = ", df))
+lines(x_temp_t, (x_temp_t - x_temp_t) + 0.1, type = "h", col = "red")
+
+# 예제 - 월간 도서판매량의 95% 신뢰구간
+x <- c(29, 24, 27, 28, 24, 25, 26, 26, 28, 26, 25, 26, 27, 26, 19, 25, 26, 26, 26, 25, 25,
+       28, 30, 32, 31, 27, 31, 29, 25, 17, 21, 23, 23, 26, 27, 27)
+n <- length(x)
+df <- n - 1
+(mean_x <- mean(x)) # 평균 : 26
+(sd_x <- sd(x)) # 표준편차 : 3.04255
+(se_x <- sd_x / sqrt(n)) # 표준오차 : 0.5070926
+# 모집단 평균의 95% 신뢰구간은?
+(t_left <- qt(0.025, df)) # 좌측 t값 : -2.030108
+(t_right <- qt(0.975, df)) # 우측 t값 : 2.030108
+(interval_left <- t_left * se_x) # 좌측 구간 : -1.029453
+(interval_right <- t_right * se_x) # 우측 구간 : 1.029453
+(conf_lower <- mean_x + interval_left) # 신뢰 구간 하한 : 24.97055
+(conf_upper <- mean_x + interval_right) # 신뢰 구간 상한 : 27.02945
+## 요약
+conf_lower <- mean_x + qt(0.025, df) * se_x
+conf_upper <- mean_x + qt(0.975, df) * se_x
+paste("모집단 평균의 95% 신뢰구간 하한은", conf_lower, "상한은", conf_upper)
+mean_x + qt(c(0.025, 0.975), df) * se_x
+# 모집단의 평균이 특정 범위에 들어갈 확률은?
+lower_value <- 25 # 특정 범위 하한 값
+upper_value <- 26 # 특정 범위 상한 
+(t_left <- (lower_value - mean_x) / se_x) # 하한 값에 해당하는 t-value : -1.972027
+(t_right <- (upper_value - mean_x) / se_x) # 상한 값에 해당하는 t-value : 0
+(p_left <- 1 - pt(t_left, df)) # 하한 t-value의 확률(왼쪽꼬리) : 0.971725
+(p_right <- 1 - pt(t_right, df)) # 상한 t-value의 확률(왼쪽꼬리) : 0.5
+(p_result <- p_left - p_right) # 0.471725
+curve(dt(x, df), -4, 4, xlab = "t", ylab = "f(t)", main = paste("P(", round(t_left, 3), "<= t <=",
+                                                                round(t_right, 3), ") =", 
+                                                                round(p_result, 5)))
+t_range <- seq(t_left, t_right, 0.02)
+lines(t_range, dt(t_range, df), type = "h", col = "grey")
+
+
+### 이항분포(Binomial distribution) - dbinom() ----
+### : 두 가지의 결과로 나타나는 어떤 사건이 있을 때, n번 시행에서 
+###   x번 특정 결과(성공, 실패)가 나타날 확률분포
+### ※ 이항분포를 구성하는 사건의 결과는 '베르누이 과정'이라는 특성이 있다.
+###    - 베르누이 과정
+###      1. 개별 시행에서 두 가지 결과만 나타난다. (앞, 뒤), (성공, 실패) 등
+###      2. 각 시행은 독립적이다. (전후 수행간 관계가 없고, 서로 영향을 주지 않는다.)
+###      3. 각 시행에서 특정 결과가 나오는 확률은 변하지 않는다.
+###         ex) '동전을 던질 때 마다 앞면이 나올 확률이 매번 달라지지 않는다'는 의미.
+###    - 베르누이 과정을 통해 n번 시행에서 x번 특정 결과가 나타날 확률
+###      P(X = x) = n! / (x! * (n - x)!) * P^x * (1 - P)^(n - x)
+###      n = 시행횟수, x = 특정 결과 횟수, P = 특정 결과 확률, (1 - P) = 특정 결과 이외의 확률,
+###      n * p = 평균, n * p * (1 - p) = 분산
+
+# 예제
+# Step1. 여러 개 그래프를 그릴 준비.
+par(mfrow = c(2, 2))
+
+# Step2. 시행 횟수와 각 시행 확률을 설정한다.
+n <- 30 # 시행횟수
+p_list <- c(0.1, 0.3, 0.5, 0.7) # 발생확률
+
+# Step3. Graph를 그린다.
+for(i in 1 : length(p_list)){
+  p_x <- dbinom(x = 1 : n, n, p_list[i])
+  plot(x = 1 : n, p_x, xlab = "x", ylab = "P(X = x)", ylim = c(0, 0.25),
+       xlim = c(1, n), main = paste("p =", p_list[i]))
+  x_seq <- seq(1, n, 1)
+  lines(x_seq, p_x, type = "h", col = "blue")
+}
+
+## 여행패키지 - 이항분포를 통한 확률 구하기
+##              서울시민을 무작위로 10씩 뽑아 그 중 유럽 여행자가 5명이 포함될 확률?
+##              P(X = 5) = 10! / (5! * (10 - 5)!) * 0.3^5 * (1 - 0.3)^(10 - 5) = 0.2
+## Step1. 시행횟수와 시행 확률을 설정한다.
+n <- 10 # 시행횟수
+p <- 0.3 # 각 시행마다 특정 결과가 나올 확률
+
+## Step2. 알고 싶은 확률값의 범위를 설정
+x_list <- c(0 : n)
+x_lower <- 1
+x_upper <- 3 # 유럽 여행자가 1명부터 3명까지 포함될 확률을 알고 싶다.
+
+## Step3. 확률 값을 구한다.
+round(dbinom(x_list, n, prob = p), 3)
+
+## Step4. 알고 싶은 확률 값만 구한다.
+round(dbinom(x_lower : x_upper, n, prob = p), 3)
+sum(dbinom(x_lower : x_upper, n, prob = p)) # P(1 <= X <= 3) = 0.6213
+
+## Step5. 그래프를 그린다.
+par(mfrow = c(1, 1))
+p_x <- dbinom(x_list, n, p)
+plot(x_list, p_x, xlab = "x", ylab = "P(X = x)", ylim = c(0, 0.4), xlim = c(0, n),
+     main = paste("n =", n ,"p =", p))
+x_seq <- seq(x_lower, x_upper, 1)
+lines(x_seq, dbinom(x_seq, n, p), type = "h", col = "red")
+
+
+### 기하분포(Geometric distribution) - dgeom() ----
+### : 특정 결과가 처음 나타나기 전까지 시도할(또는 실패할) 횟수(X)를 확률변수로 하는 분포
+###   P(X = x) = (1 - p)^x * p (x = 1, 2, 3, ...)
+###   x = 특정 결과 발생전 시도(실패) 횟수, p = 특정 결과 확률, (1 - p) = 특정 결과 이외의 확률
+###   1 / p - 1 = 평균, (1 - p) / p^2 = 분산
+### ※ 확률변수는 0 또는 1에서 시작할 수 있다.
+###    - 0부터 시작 : 성공할 때까지 시도(혹은 실퍠)한 횟수
+###                   P(X = x) = (1 - p)^x * p, (x = 0, 1, 2, 3 ...)
+###    - 1부터 시작 : x번 시행 후 첫 번째 성공할 확률
+###                   P(X = x) = (1 - p)^(x - 1) * p, (x = 1, 2, 3 ...)
+###      ex) 개별 확률이 0.3인 경우, 0부터 시작 - x = 1일 때 확률 = 0.3 * 0.7 = 0.21
+###                                  1부터 시작 - x = 1일 때 확률 = 1 * 0.3 = 0.3
+###          0부터 시작하는 경우 x = 1의 의미 : 한 번 실패했다. / 두 번 시행할 때 성공했다.
+###                                             1부터 시작하는 경우의 x = 2와 확률이 같다.
+###          1부터 시작하는 경우 x = 1의 의미 : 1번 시행했다. / 한 번도 실패하지 않았다.
+###                                             0부터 시작하는 경우의 x = 0과 확률이 같다.
+###          R은 0부터 시작하는 경우에 해당하는 확률값을 구해준다.
+# Step1. 그래프 개수를 설정한다.
+par(mfrow = c(2, 3))
+
+# Step2. 개별 확률과 시행할 횟수를 설정한다.
+p_list <- c(0.1, 0.2, 0.3, 0.4, 0.5, 0.7) # 그래프로 그릴 개별 확률들
+x_list <- 50 # 발생하는 횟수(1부터 x축에 보여줄 최대값)
+
+# Step3. 그래프를 그린다.
+for(i in 1 : length(p_list)){
+  p_x <- dgeom(x = 0 : x_list, p_list[i])
+  plot(x = 0 : x_list, p_x, xlab = "x", ylab = "P(X = x)", ylim = c(0, p_list[i] + 0.1),
+       xlim = c(0, x_list), main = paste("p =", p_list[i]))
+  x_seq <- seq(0, x_list, 1)
+  lines(x_seq, p_x, type = "h", col = "blue")
+}
+
+## 여행패키지 - 기하분포를 이용한 확률 구하기
+##              두 번 실패 후 세 번째에 유럽여행자를 발견할 확률?
+## Step1. 개별 확률을 설정
+p <- 0.3 # 발생 확률
+
+## Step2. 시행 횟수를 설정
+x_list <- c(0 : 30)
+
+## Step3. 살펴볼 범위를 설정
+x_lower <- 3 # 사례 하한
+x_upper <- 5 # 사례 상한
+
+## Step4. 확률 값 구하기
+round(dgeom(x_list, prob = p), 3)
+
+## Step5. 알고 싶은 범위의 각각 확률 값 구하기
+round(dgeom(x_lower : x_upper, prob = p), 3)
+
+## Step6. 합산된 확률값 구하기
+sum(dgeom(x_lower : x_upper, prob = p))
+
+## Step7. 그래프 그리기
+par(mfrow = c(1, 1))
+p_x <- dgeom(x_list, prob = p)
+plot(x_list, p_x, xlab = "x", ylab = "P(X = x)", ylim = c(0, 0.4), xlim = c(0, 30),
+     main = paste("p =", p))
+x_seq <- seq(x_lower, x_upper, 1)
+lines(x_seq, dgeom(x_seq, prob = p), type = "h", col = "red")
+
+
+### 초기하분포(Hyper-geometric distribution) - dhyper() ----
+### : 표본공간에 특정 현상 m개와 그 외의 현상 n이 있고, k개 표본을 '비복원' 추출하여
+###   추출한 k개중 특정 결과가 나타날 개수(X)의 확률을 이용한다.
+# Step1. 필요한 값을 설정한다.
+par(mfrow = c(2, 3))
+m <- 100 # 전체중 특정 현상 
+n <- 200 # 전체중 특정 현상 외 수
+
+# Step2. 추출할 표본의 수를 설정한다.
+k_list <- c(50, 100, 150, 200, 250, 300) # 추출하는 표본의 수
+x_list <- c(80) # 추출한 표본중 특정 결과의 수
+
+# Step3. 그래프로 나타낸다.
+for(i in 1 : length(k_list)){
+  p_x <- dhyper(x = 1 : x_list, m, m + n, k_list[i])
+  plot(x = 1 : x_list, p_x, xlab = "x", ylab = "P(X = x)", ylim = c(0, 0.15),
+       xlim = c(1, x_list), main = paste("k =", k_list[i]))
+  x_seq <- seq(1, x_list, 1)
+  lines(x_seq, p_x, type = "h", col = "blue")
+}
+
+## 이벤트 예제 - 초기하 분포를 이용한 확률 구하기
+##               10명을 임의로 선정했을 때, 자사의 고객이 티켓을 한 장도 받지 못할 확률?
+par(mfrow = c(2, 2))
+m <- 121 # 전체 중 특정 현상 수
+n <- 206 # 전체 중 특정 현상 외 수
+k <- 10 # 추출하는 표본의 수
+x <- 0 # 추출한 표본 중 특정 결과의 수
+x_list <- 10 # 추출한 표본 중 특정 결과의 수
+round(dhyper(0 : x_list, m, m + n, k), 5) # 회원이 한 명도 선정되지 않을 확률 = 4.133%
+
+# 3 ~ 5명일 확률?
+par(mfrow = c(1, 1))
+x_lower <- 3 # 사례 하한
+x_upper <- 5 # 사례 상한
+sum(round(dhyper(x_lower : x_upper, m, m + n, k), 5))
+p_x <- dhyper(0 : x_list, m, m + n, k)
+plot(x = 0 : x_list, p_x, xlab = "x", ylab = "P(X = x)", ylim = c(0, 0.30),
+     xlim = c(1, x_list), main = paste("k =", k, "x =", x))
+x_seq <- seq(x_lower, x_upper, 1)
+lines(x_seq, dhyper(x_lower : x_upper, m, m + n, k), type = "h", col = "red")
+
+
+### 포아송분포(Poisson distribution) - dpois() ----
+### : 일정한 시간, 거리, 공간 범위에 특정 결과가 나타날 횟수(X)의 확률 분포
+###   매우 낮은 사건들의 이산적인 확률분포 ex) 일정 시간 동안 걸려오는 전화 콜 수, 매장 방문자 수 ..
+### ※ 이항분포 : 시행 횟수에 따라 두 가지 결과 중 특정 결과가 발생할 확률을 분포로 나타낸다.
+###   포아송분포 : 시행횟수가 아닌 '평균발생횟수 λ(lambda)'에 따라 일정한 시간이나 공간에서
+###                특정 결과가 독립적으로 발생할 확률을 분포로 나타낸다.
+###   P(X = x) = e^(-λ) * λ^x / x!, (x >= 0)
+###   λ = μ = 평균 = 분산, e = 2.71828
+par(mfrow = c(2, 3))
+lambda_list <- c(3, 5, 10, 15, 20, 30) # 평균 리스트
+x_list <- 30 # 발생하는 횟수 (1부터 X축에 보여줄 최대값)
+for(i in 1 : length(lambda_list)){
+  p_x <- dpois(x = 0 : x_list, lambda_list[i])
+  plot(x = 0 : x_list, p_x, xlab = "x", ylab = "P(X = x)", ylim = c(0, 0.25), xlim = c(0, x_list),
+       main = paste("lambda =", lambda_list[i]))
+  x_seq <- seq(0, x_list, 1)
+  lines(x_seq, p_x, type = "h", col = "blue")
+}
+
+## 포아송 분포를 이용한 확률 구하기 - 일주일에 평균 발생할 소동 횟수 0 ~ 20의 확률
+lambda <- 5 # 평균 (일주일 평균 소동횟수)
+x_list <- c(0 : 20)
+(p_list <- round(dpois(x_list, lambda), 5)) # 0 ~ 20 까지 확률
+# 취객소동이 발생하지 않을 확률? μ = 5 / 7 = 0.7143
+#                                P(X = 0) = e^(-0.7143) * 0.7143^0 / 0! = 0.4895417
+lambda_day <- lambda / 7 # 평균 (하루 평균 소동횟수)
+(p_x_0 <- dpois(0, lambda_day)) # 하루 소동횟수 0회일 확률
+# 일주일간 최객소동이 3회 이상일 확률? P(X >= 3) = 1 - P(0 <= X <= 2)
+#                                      = 1 - 0.00674 - 0.03369 - 0.08422 = 0.875348
+par(mfrow = c(1, 1))
+x <- 3 # X이상의 확률을 포아송 분포에 표시한다.
+(p_x_above3 <- 1 - sum(dpois(c(0 : x - 1), lambda))) # 1에서 x미만 확률을 뺀다.
+p_x <- dpois(x_list, lambda)
+plot(x_list, p_x, xlab = "x", ylab = "P(X = x)", ylim = c(0, 0.25), xlim = c(0, 20),
+     main = paste("lambda =", lambda, ", X >=", x))
+x_seq <- seq(x, 20, 1)
+lines(x_seq, dpois(x_seq, lambda), type = "h", col = "red")
+             # 포아송분포는 어떤 결과의 발생횟수를 확률변수로 하는 이산확률분포
+qpois(seq(0, 0.95, 0.05), 5) # 확률에 해당하는 발생 횟수, 평균(lambda) = 5
+
+
+### 지수분포(Exponential distribution) - dexp() ----
+### : 포아송을 따르는 특정 결과가 발생한 후 다음 결과가 나타나기까지 간격(X)을 확률변수로 갖는다.
+###   즉, '특정 결과들 사이의 시간, 공간 등의 크기'의 분포로 연속확률분포에 해당한다.
+###   ex) 걸려오는 전화콜 사이의 시간 간격, 매장 방문자 후 다음 방문자 사이의 간격,
+###       출생이나 재해 후 다음 출생이나 재해까지의 시간 간격, 제품의 결점 이후 다음 결점까지의 공간간격.
+###       - 시간당 전화가 평균 6건 걸려온다면, 걸려온 시점간 간격은 1 / 6에 해당하는 10분이다.
+###       -> 지수분포의 평균 = 포아송분포 평균의 역수
+### ※ 지수분포 : '시간 또는 공간'이라는 확률변수로 나타나는 연속확률분포
+###   포아송분포 : '횟수'라는 확률변수로 나타나는 이산확률분포
+###   f(x) = λ * e^(λ(-x)), (x > 0)
+###   P(X >= x) = e^(λ(-x)) : 다음사건 발생까지 간격, e = 2.7
+###   λ = 1 / μ = 지수의 평균과 표준편차
+par(mfrow = c(2, 3))
+rate_list <- c(1, 0.2, 0.3, 0.5, 0.7) # Rate 리스트
+x_list <- 10 # 발생하는 횟수
+curve(dexp(x, rate_list[1]), 0, x_list, ylab = "f(x)", xlab = "x", cex.axis = 1)
+for(i in 2 : length(rate_list)){
+  curve(dexp(x, rate_list[i]), add = T, col = i)
+}
+legend(6, 1, paste("rate =", rate_list), col = 1 : length(rate_list), pch = "_____")
+for(i in 1 : length(rate_list)){
+  curve(dexp(x, rate_list[i]), 0, x_list, ylab = "f(x)", xlab = "x", ylim = c(0, 1),
+        main = paste("rate =", rate_list[i]), col = i)
+}
+
+## 지수분포를 이용한 확률 구하기 - 확률계산을 위해 포아송함수는 시간당 횟수, 
+##                                 지수함수는 사건당 시간간격을 요구하므로 시간당 평균 5건의 통화를
+##                                 한 통화당 평균 12분으로 단위를 변환한다.
+lambda_min <- 12 # 평균 통화간격
+x_list <- seq(1, 20, 1)
+round(pexp(x_list, rate = 1 / lambda_min, lower.tail = F), 5) # 1분 ... 20분 이후 통화확률
+round(pexp(x_list, rate = 1 / lambda_min), 5) # 1분 ... 20분 이내 통화확률
+# 방금 전화통화를 마친 직원에게 앞으로 5분 뒤에(5분 이후에) 전화가 올 확률?
+#                                      P(X >= 5) = e^(1/12*(-5)) = 0.65924
+x <- 5
+round(pexp(x, rate = 1 / lambda_min, lower.tail = F), 5) # 5분이후 통화확률
+# 방금 전화통화를 마친 직원에게 앞으로 6분 후 10분 이내에 전화가 올 확률?
+#                                      P(6 <= X <= 10) = e^(1/12*(-6)) - e^(1/12*(-10))
+#                                                      = 0.60653 - 0.4346 = 0.17193
+par(mfrow = c(1, 1))
+x_lower <- 6; x_upper <- 10 # 특정 시간 사이에 통화할 확률
+p_lower <- round(pexp(x_lower, rate = 1 / lambda_min, lower.tail = F), 5)
+p_upper <- round(pexp(x_upper, rate = 1 / lambda_min, lower.tail = F), 5)
+p_lower - p_upper
+curve(dexp(x, rate = 1 / lambda_min), 0, 40, xlab = "x", ylab = "f(x)", ylim = c(0, 0.12),
+      main = paste("Rate =", round(1 / lambda_min, 3), ",", x_lower, " <= X <=", x_upper))
+x_seq <- seq(x_lower, x_upper, 0.02)
+lines(x_seq, dexp(x_seq, rate = 1 / lambda_min), type = "h", col = "red")
