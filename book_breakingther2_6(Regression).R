@@ -218,3 +218,212 @@ summary(Lm)
 # Step6. 잔차(Residuals)관련 그래프를 그린다.
 par(mfrow = c(2, 2))
 plot(Lm)
+
+
+
+# 3. 다중선형회귀분석(Multiple Linear Regression) - 독립변수가 여러 개인 경우
+# - 다중선형회귀분석부터는 그래프를 통한 해석보다는 수치를 통한 해석이 더 유용하다.
+#   yi = b0 + b1xi + b2xi + b3xi + b4xi + ... + Ei
+
+
+# 다중선형회귀분석 Examples
+# 1) mtcars 데이터셋 다중선형회귀분석
+# Step1. 데이터를 불러온다.
+DF <- mtcars
+str(DF)
+
+# Step2. 독립변수를 추가한다.
+(Lm <- lm(hp ~ cyl + wt, data = DF))
+
+# Step3. 검정한다.
+summary(Lm)
+
+
+# 2) 지구 최고온도에 영향을 미치는 독립변수로 다중회귀분석하기
+# Step1. 데이터를 확인한다.
+head(airquality) # 뉴욕의 1973년 5 ~ 9월까지의 대기상태에 대한 정보들을 담은 데이터셋
+plot(airquality) # Temp : 최고온도, Solar.R : 태양방사선량, Wind(평균풍속)
+
+# Step2. 다중회귀분석 실시하기
+(Lm <- lm(Temp ~ Ozone + Solar.R + Wind, data = airquality))
+
+# Step3. 회귀모형을 검정한다.
+summary(Lm)
+
+
+
+# 4. 추정치 구하기 - Examples
+# 1) 야구 데이터로 추정하기
+# Step1. 데이터를 불러온다.
+DF <- read.csv("example_kbo2015.csv")
+
+# Step2. 구조를 살펴본다.
+head(DF)
+
+# Step3. 회귀모형을 구한다.
+(Lm <- lm(HR ~ TB, data = DF))
+
+# Step4. 회귀모형을 검정한다.
+summary(Lm)
+
+# Step5. 회귀모형에 값을 넣어 추정치를 구한다.
+(b <- predict(Lm))
+
+# Step6. 두 값을 비교해 본다.
+DF$HR[1]; b[1]
+
+# Step7. 데이터프레임(data.frame)에 넣어 비교한다.
+(Com <- data.frame(team = DF$team, HR = DF$HR, fittedHR = b))
+
+# Step8. 새로운 데이터를 만든다.
+NewTeam <- data.frame(TB = 1600)
+
+# Step9. 예측값을 구한다.
+predict(Lm, newdata = NewTeam) # 1600개의 루타 -> 121개의 홈런
+
+
+# 2) mtcars 데이터로 추정치 구하기
+# Step1. 데이터를 불러온다.
+DF <- mtcars
+
+# Step2. 구조를 살펴본다.
+head(DF)
+
+# Step3. 회귀모형을 구한다.
+(Lm <- lm(mpg ~ wt, data = DF))
+
+# Step4. 회귀모형을 검정한다.
+summary(Lm)
+
+# Step5. 회귀모형에 값을 넣어 추정치를 구한다.
+(b <- predict(Lm))
+
+# Step6. 두 값을 비교해 본다.
+DF$mpg[1]; b[1]
+
+# Step7. 데이터프레임(data.frame)에 넣어 비교한다.
+(Com <- data.frame(mpg = DF$mpg, fittedMPG = b))
+
+# Step8. 새로운 데이터를 만든다.
+NewCar <- data.frame(wt = 6)
+
+# Step9. 예측값을 구한다.
+predict(Lm, newdata = NewCar) # 6톤 차체무게 -> 5.21 연비
+
+# Step10. 새로운 값들을 대입한다.
+NewCar2 <- data.frame(wt = 0.4)
+predict(Lm, newdata = NewCar2) # 400kg -> 35.14 연비
+
+
+# 3) 예측값 신뢰구간으로 나타내기
+# - 추정하는 값을 'x가 2일 때 30이다'라고 말하는 것보다 'x가 2일 때 28 ~ 32이다'라고 말하는 것이 좋다.
+# Step1. 데이터를 불러온다.
+library(ggplot2)
+DF <- diamonds
+
+# Step2. 데이터 구조를 살펴본다.
+str(DF)
+
+# Step3. 표본을 만든다.
+Sample <- diamonds[sample(nrow(DF), 100), ]
+
+# Step4. 그래프를 그린다.
+g1 <- ggplot(Sample, aes(x = carat, y = price, colour = color)) + geom_point()
+                                               # 회귀모형은 그룹별로 여러 개 표시된다.
+g2 <- ggplot(Sample, aes(x = carat, y = price)) + geom_point(aes(colour = color))
+                                                                 # 회귀모형은 하나만 표시된다.
+      # why?) ggplot()함수에 넣으면 colour인자가 뒤에 있는 함수들에 전달된다.
+      #       but, geom_point()함수에 사용된 인자값은 뒤에 있는 함수들에게 전달되지 않는다.
+
+# Step5. color별 회귀모형
+g1 + geom_smooth(method = "lm")
+g2 + geom_smooth(method = "lm")
+
+# Step6. 정확한 값으로 예측구간 나타내기
+Lm <- lm(price ~ carat, data = Sample)
+predict(Lm, interval = "confidence", level = 0.95)
+
+
+
+# 5) 다중선형회귀분석에서 변수선택법
+# - 잔차(Residuals)가 적은 모델이 회귀모형으로서 더 적합한 모델이다.
+#   ① 전진선택법 : 변수가 한 개일때 가장 좋은 모형을 선택하고 선택된 변수가 포함된 두 개 변수인 경우에서
+#                   다시 변수를 선택 해 다른 모델을 선정.
+#   ② 후진제거법 : 전진선택법과 정반대로 진행
+
+
+# 다중선형회귀분석에서 변수선택법 Examples
+# 1) 최상부분집합선택법 - step()함수를 이용
+# Step1. 데이터로 기존 내장 데이터셋이 mtcars를 사용한다.
+DF <- mtcars
+
+# Step2. 회귀모형을 구한다.
+(Lm <- lm(mpg ~ ., data = DF))
+
+# Step3. step()함수를 사용한다. - AIC통계량을 이용해 변수를 선택한다.
+Slm <- step(Lm, direction = "both")
+
+# Step4. 최종 회귀모형을 확인한다.
+Slm # 종속변수 : mpg(연비) / 독립변수 : wt(차체무게), qsec(드래그 레이스 타임), am(미션종류)
+
+
+# 2) 최상부분집합선택법 - leaps패키지를 이용
+# Step1. R을 이용해 mtcars()에 어떤 변수들이 있는지 알아본다.
+DF <- mtcars
+
+# Step2. 변수선택 함수를 제공해주는 'leaps'패키지를 설치한다.
+install.packages("leaps")
+library(leaps)
+
+# Step3. 'regsubsets()'함수를 이용해 변수선택 하기
+Slm <- regsubsets(mpg ~ ., data = DF, nvmax = 10, method = "exhaustive")
+       # regsubsets(formula, data, 독립변수개수, 변수선택법 선택) - BIC를 이용한 통계량을 계산해 주는 함수
+summary(Slm)
+
+# Step4. 변수선택 기준 BIC를 이용해 최적의 모델 선택하기
+(BestBic <- summary(Slm)$bic)
+
+# Step5. 통계량이 가장 적은 변수 찾기
+Min_val <- which.min(BestBic)
+plot(BestBic, type = "b")
+points(Min_val, BestBic[Min_val], cex = 2, col = "red", pch = 20)
+
+# Step6. 최적의 모델 구현하기
+coef(Slm, 3) # coef(모델, 독립변수의 개수)
+             # mpg = 9.617781 - 3.916504(wt) + 1.225886(qsec) + 2.935837(am)
+
+
+# 3) 전진선택법(Forward Stepwise Selection method)으로 선택하기
+# Step1. 라이브러리
+library(leaps)
+
+# Step2. 'regsubsets()'함수를 이용해 변수선택 하기
+Slm <- regsubsets(mpg ~ ., data = mtcars, nvmax = 10, method = "forward")
+summary(Slm)
+
+# Step3. 변수선택 기준 BIC를 이용해 최적의 모델 선택하기
+ForwardBic <- summary(Slm)$bic
+Min_val <- which.min(ForwardBic)
+plot(ForwardBic, type = "b")
+points(Min_val, ForwardBic[Min_val], cex = 2, col = "red", pch = 20)
+
+# Step4. 최적의 모델 구현하기
+coef(Slm, 2) # mpg = 39.686261 - 1.507795(cyl) - 3.190972(wt)
+
+
+# 4) 후진선택법(Backward elimination method)을 이용해 따라해보기
+# Step1. 라이브러리
+library(leaps)
+
+# Step2. 'regsubsets()'함수를 이용해 변수 선택 하기
+Slm <- regsubsets(mpg ~ ., data = mtcars, nvmax = 10, method = "backward")
+summary(Slm)
+
+# Step3. 변수선택 기준 BIC를 이용해 최적의 모델 선택하기
+BackwardBic <- summary(Slm)$bic
+Min_val <- which.min(BackwardBic)
+plot(BackwardBic, type = "b")
+points(Min_val, BackwardBic[Min_val], cex = 2, col = "red", pch = 20)
+
+# Step4. 최적의 모델 구현하기
+coef(Slm, 3) # mpg = 9.17781 - 3.916504(wt) + 1.225886(qsec) + 2.935837(am)
